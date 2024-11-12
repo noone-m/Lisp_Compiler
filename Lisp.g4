@@ -41,25 +41,20 @@ COMMENT: ';' ~[\r\n]* -> skip ;
 MULTILINE_COMMENT: '#|' .*? '|#' -> skip ;
 
 // Keywords 
-IF: 'if' ;
-DEFINE: 'define' ;
-LAMBDA: 'lambda' ;
-WRITE: 'write' ;
-WRITE_LINE: 'write-line' ;
-SETQ: 'setq' ;
-DEFUN: 'defun' ;
-COND: 'cond' ;
-AND: 'and' ;
-OR: 'or' ;
-NOT: 'not' ;
-EQUAL: '=' ;
-LESS: '<' ;
-GREATER: '>' ;
-CAR: 'car' ;
-CDR: 'cdr' ;
-CONS: 'cons' ;
-
-
+IF: [iI] [fF] ;
+DEFINE: [dD] [eE] [fF] [iI] [nN] [eE] ;
+LAMBDA: [lL] [aA] [mM] [bB] [dD] [aA] ;
+WRITE: [wW] [rR] [iI] [tT] [eE] ;
+WRITE_LINE: [wW] [rR] [iI] [tT] [eE] '-' [lL] [iI] [nN] [eE] ;
+SETQ: [sS] [eE] [tT] [qQ] ;
+DEFUN: [dD] [eE] [fF] [uU] [nN] ;
+COND: [cC] [oO] [nN] [dD] ;
+AND: [aA] [nN] [dD] ;
+OR: [oO] [rR] ;
+NOT: [nN] [oO] [tT] ;
+CAR: [cC] [aA] [rR] ;
+CDR: [cC] [dD] [rR] ;
+CONS: [cC] [oO] [nN] [sS] ;
 STRING: '"' (~["\r\n])* '"' ;
 
 // Operator tokens
@@ -67,9 +62,12 @@ PLUS: '+' ;
 MINUS: '-' ;
 MULTIPLY: '*' ;
 DIVIDE: '/' ;
+EQUAL: '=' ;
+LESS: '<' ;
+GREATER: '>' ;
 
 SYMBOL: [a-zA-Z_][a-zA-Z0-9_]* ;
 
-NUMBER: [0-9]+ ;
+NUMBER: '-'? [0-9]+ ('.' [0-9]+)?;
 
-WS: [ \t\r\n]+ -> skip ;
+WS: [ \t\r\n]+ -> skip ; 
