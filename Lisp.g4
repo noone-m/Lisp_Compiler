@@ -48,6 +48,7 @@ WRITE: [wW] [rR] [iI] [tT] [eE] ;
 WRITE_LINE: [wW] [rR] [iI] [tT] [eE] '-' [lL] [iI] [nN] [eE] ;
 SETQ: [sS] [eE] [tT] [qQ] ;
 DEFUN: [dD] [eE] [fF] [uU] [nN] ;
+DOTIMES: [dD] [oO] [Tt] [iI] [mM] [eE] [sS];
 COND: [cC] [oO] [nN] [dD] ;
 AND: [aA] [nN] [dD] ;
 OR: [oO] [rR] ;
@@ -55,7 +56,18 @@ NOT: [nN] [oO] [tT] ;
 CAR: [cC] [aA] [rR] ;
 CDR: [cC] [dD] [rR] ;
 CONS: [cC] [oO] [nN] [sS] ;
+ABS: [aA] [bB] [sS] ;
+LOG : [lL] [oO] [gG];
+GCD: [gG] [cC] [dD];
+FLOOR : [Ff] [lL] [Oo] [Oo] [Rr];
+SIN : [sS] [iI] [nN];
+SINH : [sS] [iI] [nN] [hH];
+
+ROUND: [rR] [oO] [uU] [nN] [dD];
+ICM: [iI] [cC] [mM];
+
 STRING: '"' (~["\r\n])* '"' ;
+
 
 // Operator tokens
 PLUS: '+' ;
@@ -66,7 +78,7 @@ EQUAL: '=' ;
 LESS: '<' ;
 GREATER: '>' ;
 
-SYMBOL: [a-zA-Z_][a-zA-Z0-9_]* ;
+SYMBOL: [a-zA-Z_-][a-zA-Z0-9_-]* ;
 
 NUMBER: '-'? [0-9]+ ('.' [0-9]+)?;
 
