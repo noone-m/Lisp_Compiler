@@ -23,22 +23,24 @@ public class LispLexerApp {
             // Parse the input and generate the parse tree
             ParseTree tree = parser.program();
             
+            // Get the vocabulary to convert token types to their names
+            Vocabulary vocabulary = lexer.getVocabulary();
+
             for (Token token : tokens.getTokens()) {
-            String tokenInfo = String.format(
-                "[@%d,%d:%d='%s',<%d>,%d:%d]",
-                token.getTokenIndex(),
-                token.getStartIndex(),
-                token.getStopIndex(),
-                token.getText(),
-                token.getType(),
-                token.getLine(),
-                token.getCharPositionInLine()
-            );
-            System.out.println(tokenInfo);
-        }
+                String tokenInfo = String.format(
+                    "[@%d ='%s',<%d:%s>,%d:%d]",
+                    token.getTokenIndex(),
+                    token.getText(),
+                    token.getType(),
+                    vocabulary.getSymbolicName(token.getType()),
+                    token.getLine(),
+                    token.getCharPositionInLine()
+                );
+                System.out.println(tokenInfo);
+            }
 
             // Print the parse tree (in Lisp format)
-            System.out.println(tree.toStringTree(parser));
+            // System.out.println(tree.toStringTree(parser));
         } catch (Exception e) {
             e.printStackTrace();
         }
