@@ -3,7 +3,7 @@
 
 ;; Demonstration of strings with escape characters and special symbols
 
-(defparameter *escaped-string*
+(defparameter \ss?*e
   "This is a string with a newline:
 And a tab:	(Done!) the  newline:
 and a tab")

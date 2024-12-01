@@ -1,41 +1,41 @@
 grammar Lisp;
 
 // Root rule
-program: .* EOF ;
+program: expression* EOF ;
 
 
-// expression
-//     : NUMBER                   
-//     | SYMBOL                   
-//     | STRING                  
-//     | PLUS expression+        
-//     | MINUS expression+        
-//     | MULTIPLY expression+     
-//     | DIVIDE expression+       
-//     | AND expression+          
-//     | OR expression+           
-//     | NOT expression           
-//     | EQUAL expression+        
-//     | LESS expression+         
-//     | GREATER expression+      
-//     | IF expression expression expression 
-//     | COND '(' cond_branch+ ')' 
-//     | DEFUN SYMBOL '(' parameters? ')' expression // function definition
-//     | SETQ SYMBOL expression   
-//     | CAR expression           
-//     | CDR expression           
-//     | CONS expression expression
-//     | list                     
-//     ;
+expression
+    : NUMBER                   
+    | SYMBOL                   
+    | STRING                  
+    | PLUS expression+        
+    | MINUS expression+        
+    | MULTIPLY expression+     
+    | DIVIDE expression+       
+    | AND expression+          
+    | OR expression+           
+    | NOT expression           
+    | EQUAL expression+        
+    | LESS expression+         
+    | GREATER expression+      
+    | IF expression expression expression 
+    | COND '(' cond_branch+ ')' 
+    | DEFUN SYMBOL '(' parameters? ')' expression // function definition
+    | SETQ SYMBOL expression   
+    | CAR expression           
+    | CDR expression           
+    | CONS expression expression
+    | list                     
+    ;
 
-// // Define a list as a sequence of expressions in parentheses
-// list: '(' expression* ')' ;
+// Define a list as a sequence of expressions in parentheses
+list: '(' expression* ')' ;
 
 
-// parameters: SYMBOL+ ;
+parameters: SYMBOL+ ;
 
-// // Define a conditional branch for `COND`
-// cond_branch: '(' expression expression ')' ;
+// Define a conditional branch for `COND`
+cond_branch: '(' expression expression ')' ;
 
 STRING: '"' ( ~["\\] | '\\' ['"\\nrt] )* '"';
 
@@ -43,6 +43,9 @@ LPAREN: '(';
 RPAREN: ')';
 COMMENT: ';' ~[\r\n]* -> skip ;
 MULTILINE_COMMENT: '#|' .*? '|#' -> skip ;
+
+T : [Tt];
+NIL: [Nn] [Ii] [Ll];
 
 // Keywords 
 IF: [iI] [fF] ;
@@ -54,7 +57,7 @@ WRITE_LINE: [wW] [rR] [iI] [tT] [eE] '-' [lL] [iI] [nN] [eE] ;
 SETQ: [sS] [eE] [tT] [qQ] ;
 DEFPARAMETER: [Dd] [eE] [fF] [pP] [aA] [rR] [aA] [mM] [eE] [tT] [eE] [rR];
 DEFUN: [dD] [eE] [fF] [uU] [nN] ;
-
+PRINT: [Pp] [Rr] [Ii] [Nn] [Tt] ;
 FORMAT: [Ff] [Oo] [Rr] [Mm] [Aa] [tT];
 DOTIMES: [dD] [oO] [Tt] [iI] [mM] [eE] [sS];
 COND: [cC] [oO] [nN] [dD] ;
@@ -86,7 +89,7 @@ EQUAL: '=' ;
 LESS: '<' ;
 GREATER: '>' ;
 
-SYMBOL: ('*' | [a-zA-Z_-]) ([a-zA-Z0-9_-] | '*') * ;
+SYMBOL: ('*'  |  '?' | '\\' | [a-zA-Z!<>_-]) ([a-zA-Z0-9_-] | '*' | '?') * ;
 
 NUMBER: '-'? [0-9]+ ('.' [0-9]+)?;
 

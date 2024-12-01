@@ -40,7 +40,7 @@ public class LispLexerApp {
             }
 
             // Print the parse tree (in Lisp format)
-            // System.out.println(tree.toStringTree(parser));
+            System.out.println(tree.toStringTree(parser));
         } catch (Exception e) {
             e.printStackTrace();
         }
