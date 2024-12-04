@@ -5,7 +5,9 @@ program: expression* EOF ;
 
 
 expression
-    : NUMBER                   
+    : NUMBER   
+    |NIL
+    |T                
     | SYMBOL                   
     | STRING                  
     | PLUS expression+        
@@ -21,10 +23,14 @@ expression
     | IF expression expression expression 
     | COND '(' cond_branch+ ')' 
     | DEFUN SYMBOL '(' parameters? ')' expression // function definition
-    | SETQ SYMBOL expression   
+    | SETQ SYMBOL expression
+    | DEFPARAMETER SYMBOL expression 
+    | FORMAT expression STRING expression*
+    | FUNCALL expression parameters*
     | CAR expression           
     | CDR expression           
     | CONS expression expression
+    | lambdaExpr
     | list                     
     ;
 
@@ -33,6 +39,9 @@ list: '(' expression* ')' ;
 
 
 parameters: SYMBOL+ ;
+
+lambdaExpr: LAMBDA '(' parameters? ')' expression
+;
 
 // Define a conditional branch for `COND`
 cond_branch: '(' expression expression ')' ;

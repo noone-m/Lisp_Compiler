@@ -1,5 +1,6 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.gui.TreeViewer;
 
 public class LispLexerApp {
     public static void main(String[] args) {
@@ -25,12 +26,18 @@ public class LispLexerApp {
             
             // Get the vocabulary to convert token types to their names
             Vocabulary vocabulary = lexer.getVocabulary();
-
             for (Token token : tokens.getTokens()) {
+                    String tokenText =  token.getText();
+                    if (token.getType() == LispLexer.STRING) {
+                        // Remove the surrounding quotes and unescape backslashes
+                        tokenText = tokenText.substring(1, tokenText.length() - 1).replace("\\\\", "\\");
+                        tokenText = tokenText.replace(" \\\" ", " \" ");
+                        
+                    }
                 String tokenInfo = String.format(
                     "[@%d ='%s',<%d:%s>,%d:%d]",
                     token.getTokenIndex(),
-                    token.getText(),
+                    tokenText,
                     token.getType(),
                     vocabulary.getSymbolicName(token.getType()),
                     token.getLine(),
@@ -41,6 +48,8 @@ public class LispLexerApp {
 
             // Print the parse tree (in Lisp format)
             System.out.println(tree.toStringTree(parser));
+            TreeViewer viewer = new TreeViewer(null,tree);
+            viewer.open();
         } catch (Exception e) {
             e.printStackTrace();
         }
