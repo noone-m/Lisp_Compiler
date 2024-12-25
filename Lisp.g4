@@ -3,21 +3,24 @@ grammar Lisp;
 // Root rule
 program: expression* EOF ;
 
-
-expression
-    : NUMBER   
+expression : NUMBER
     |NIL
     |T                
     | SYMBOL                   
-    | STRING                  
+    | STRING
     | PLUS expression+        
     | MINUS expression+        
     | MULTIPLY expression+     
-    | DIVIDE expression+       
-    | AND expression+          
+    | DIVIDE expression+
+    | list  ;
+
+boundedExpression: 
+    AND expression+        
     | OR expression+           
     | NOT expression           
-    | EQUAL expression+        
+    | EQUAL expression+  
+    | GREATER_EQUAL expression+    
+    | LESS_EQUAL expression+    
     | LESS expression+         
     | GREATER expression+      
     | IF expression expression expression 
@@ -25,17 +28,18 @@ expression
     | DEFUN SYMBOL '(' parameters? ')' expression // function definition
     | SETQ SYMBOL expression
     | DEFPARAMETER SYMBOL expression 
+    | WRITE expression
+    | WRITE_LINE STRING 
     | FORMAT expression STRING expression*
     | FUNCALL expression parameters*
     | CAR expression           
     | CDR expression           
     | CONS expression expression
-    | lambdaExpr
-    | list                     
+    | lambdaExpr                  
     ;
 
 // Define a list as a sequence of expressions in parentheses
-list: '(' expression* ')' ;
+list: '(' (boundedExpression|expression)* ')' ;
 
 
 parameters: SYMBOL+ ;
@@ -96,7 +100,9 @@ MULTIPLY: '*' ;
 DIVIDE: '/' ;
 EQUAL: '=' ;
 LESS: '<' ;
-GREATER: '>' ;
+GREATER: '>';
+GREATER_EQUAL: '>=' ;
+LESS_EQUAL: '<=' ;
 
 SYMBOL: ('*'  |  '?' | '\\' | [a-zA-Z!<>_-]) ([a-zA-Z0-9_-] | '*' | '?') * ;
 
