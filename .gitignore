@@ -1,2 +1,2 @@
 /.antlr/*
-!/.antlr/LispLexerApp.java  
+!/.antlr/*.java  

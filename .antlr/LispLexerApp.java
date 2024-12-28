@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class LispLexerApp {
     public static void main(String[] args) {
@@ -22,7 +25,7 @@ public class LispLexerApp {
 
             // Parse the input and generate the parse tree
             ParseTree tree = parser.program();
-
+            
             // Get the vocabulary to convert token types to their names
             Vocabulary vocabulary = lexer.getVocabulary();
 
@@ -60,6 +63,10 @@ public class LispLexerApp {
             generateAstDotFile(ast, astDotFilePath);
             System.out.println("DOT file for AST created: " + astDotFilePath);
 
+
+            // Evaluator
+            Evaluator evaluator = new Evaluator();
+            evaluator.evaluate(ast);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -121,90 +128,107 @@ public class LispLexerApp {
     }
 }
 
-// AST Node class to represent nodes in the Abstract Syntax Tree
-class ASTNode {
-    String label;
-    List<ASTNode> children = new ArrayList<>();
 
-    public ASTNode(String label) {
-        this.label = label;
-    }
 
-    public void addChild(ASTNode child) {
-        children.add(child);
-    }
 
-    @Override
-    public String toString() {
-        return label + (children.isEmpty() ? "" : children.toString());
-    }
-}
 
-// Custom ASTBuilder class extending LispBaseVisitor
-class ASTBuilder extends LispBaseVisitor<ASTNode> {
 
-    @Override
-    public ASTNode visitProgram(LispParser.ProgramContext ctx) {
-        ASTNode node = new ASTNode("Program");
-        for (LispParser.ExpressionContext exprCtx : ctx.expression()) {
-            ASTNode expressionNode = visit(exprCtx); // Recursively visit expressions
-            if(expressionNode != null){
-                node.addChild(expressionNode);
-            }
-        }
-        return node;
-    }
+// class Evaluator {
+//     private Map<String, Object> variables = new HashMap<>();
+//     private Map<String, Function> functionTable = new HashMap<>();
 
-    @Override
-    public ASTNode visitExpression(LispParser.ExpressionContext ctx) {
-        if (ctx.NUMBER() != null) {
-            return new ASTNode(ctx.NUMBER().getText());
-        } else if (ctx.SYMBOL() != null) {
-            return new ASTNode(ctx.SYMBOL().getText());       
-        } else if (ctx.STRING() != null) {
-            return new ASTNode(ctx.STRING().getText());       
-        } else if (ctx.list() != null) {
-            return visit(ctx.list());
-        } else if (ctx.PLUS() != null || ctx.MINUS() != null || ctx.MULTIPLY() != null || ctx.DIVIDE() != null) {
-            String operator = ctx.getChild(0).getText(); // Get the operator symbol
-            ASTNode node = new ASTNode(operator);
-            for (int i = 1; i < ctx.getChildCount(); i++) { // Skip the operator itself
-                node.addChild(visit(ctx.getChild(i)));
-            }
-            return node;
-        } 
-        return null;
-    }
+//     public void evaluate(ASTNode node) {
+//         switch (node.label) {
+//             case "Program":
+//             case "List":
+//                 for (ASTNode child : node.children) {
+//                     evaluate(child);
+//                 }
+//                 node.value = node.children.get(0).value;
+//                 break;
+                
+//             case "+":
+//                 System.out.println("plus");
+//                 double result = 0;
+//                 for (ASTNode child : node.children) {
+//                     result += Double.parseDouble(child.label);
+//                 }
+//                 node.value = result;
+//                 System.out.println("plus");
+//                 System.out.println("node.value is " + node.value);
+//                 break;                
 
-    @Override
-    public ASTNode visitList(LispParser.ListContext ctx) {
-        ASTNode node = new ASTNode("List");
-        for (ParseTree child : ctx.children) {
-            ASTNode expressionNode = visit(child); // Recursively visit expressions
-            if(expressionNode != null){
-                node.addChild(expressionNode);
-            }
-        }
-        return node;
-    }
+//             // case "defun":
+//             //     defineFunction(node);
+//             //     break;
+//             // case "call":
+//             //     callFunction(node);
+//             //     break;
+//             case "defparameter":
+//                 if (node.children.size() == 2) {
+//                     System.out.println("children" + node.children);
+//                     String label = node.children.get(0).label;
+//                     Object value = node.children.get(1).value;
+//                     variables.put(label, value);
+//                     System.out.println(label);
+//                     System.out.println("variables" + variables);
+//                 }
+//                 break;
+//             case "write":
+//                 System.out.println("write");
+//                 if (node.children.size() > 0) {
+//                     String label = node.children.get(0).label;
+//                     System.out.println(label);
+//                     System.out.println("variables" + variables);
+//                     if(variables.containsKey(label)){
+//                         Object output = variables.get(label);
+//                         System.out.println(output);
+//                     }
+//                 }
+//                 break;
+//             default:
+//                 throw new UnsupportedOperationException("Unknown operation: " + node.label);
+//         }
+//     }
 
-    @Override
-    public ASTNode visitBoundedExpression(LispParser.BoundedExpressionContext ctx) {
-        if (ctx.WRITE_LINE() != null) {
-            String functionName = ctx.getChild(0).getText(); // Get the operator symbol
-            System.out.println("fuction name is " + functionName);
-            ASTNode node = new ASTNode(functionName);
-            for (int i = 1; i < ctx.getChildCount(); i++) { // Skip the operator itself
-                ParseTree child = ctx.getChild(i);
-                // System.out.println("child type is " + child.getClass());
-                if (child instanceof TerminalNodeImpl) { // Handle terminal nodes (like string literals) 
-                    node.addChild(new ASTNode(child.getText()));
-                }else{
-                    node.addChild(visit(ctx.getChild(i)));
-                }
-            }
-            return node;
-        } 
-        return null;
-    }
-}
+//     // private void defineFunction(ASTNode node) {
+//     //     String functionName = node.children.get(0).label;
+//     //     List<String> parameters = node.children.get(1).children.stream().map(child -> child.label).collect(Collectors.toList());
+//     //     ASTNode body = node.children.get(2);
+//     //     functionTable.put(functionName, new Function(parameters, body));
+//     // }
+
+//     // private void callFunction(ASTNode node) {
+//     //     String functionName = node.children.get(0).label;
+//     //     List<ASTNode> arguments = node.children.subList(1, node.children.size());
+//     //     Function function = functionTable.get(functionName);
+//     //     if (function != null) {
+//     //         evaluateFunction(function, arguments);
+//     //     } else {
+//     //         throw new UnsupportedOperationException("Undefined function: " + functionName);
+//     //     }
+//     // }
+
+//     // private void evaluateFunction(Function function, List<ASTNode> arguments) {
+//     //     Map<String, Object> localVars = new HashMap<>();
+//     //     for (int i = 0; i < function.parameters.size(); i++) {
+//     //         localVars.put(function.parameters.get(i), arguments.get(i).label); // Simplified for example
+//     //     }
+//     //     Evaluator localEvaluator = new Evaluator();
+//     //     localEvaluator.variables = localVars;
+//     //     localEvaluator.functionTable = this.functionTable; // Share the function table
+//     //     localEvaluator.evaluate(function.body);
+//     // }
+
+
+// }
+
+// class Function {
+//     List<String> parameters;
+//     ASTNode body;
+
+//     public Function(List<String> parameters, ASTNode body) {
+//         this.parameters = parameters;
+//         this.body = body;
+//     }
+// }
