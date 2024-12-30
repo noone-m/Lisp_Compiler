@@ -24,6 +24,10 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
             return new ASTNode(ctx.SYMBOL().getText());       
         } else if (ctx.STRING() != null) {
             return new ASTNode(ctx.STRING().getText());       
+        } else if (ctx.NIL() != null) {
+            return new ASTNode(ctx.NIL().getText().toLowerCase());       
+        } else if (ctx.T() != null) {
+            return new ASTNode(ctx.T().getText().toLowerCase());       
         } else if (ctx.list() != null) {
             return visit(ctx.list());
         } else if (ctx.PLUS() != null || ctx.MINUS() != null || ctx.MULTIPLY() != null || ctx.DIVIDE() != null) {
@@ -52,11 +56,11 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBoundedExpression(LispParser.BoundedExpressionContext ctx) {
-        if (ctx.WRITE() != null || ctx.DEFPARAMETER() != null) {
-            String functionName = ctx.getChild(0).getText(); // Get the operator symbol
-            System.out.println("fuction name is " + functionName);
-            ASTNode node = new ASTNode(functionName);
-            for (int i = 1; i < ctx.getChildCount(); i++) { // Skip the operator itself
+        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null) {
+            String preserveWordName = ctx.getChild(0).getText().toLowerCase(); 
+            System.out.println("preserve word name is " + preserveWordName);
+            ASTNode node = new ASTNode(preserveWordName);
+            for (int i = 1; i < ctx.getChildCount(); i++) { 
                 ParseTree child = ctx.getChild(i);
                 // System.out.println("child type is " + child.getClass());
                 if (child instanceof TerminalNodeImpl) { // Handle terminal nodes (like string literals) 

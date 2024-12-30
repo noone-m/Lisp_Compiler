@@ -1,2 +1,13 @@
 (defparameter x (- 3 5))
 (write x)
+;(WRITE-LINe x)
+;(defparameter x2 (or NIL NIL NIL NIL))
+;(write x2)
+;(defparameter x3 (not T))
+;(write x3)
+(defparameter x4 (= 8 8  4))
+(write x4)
+
+;(<=  5 3 6)
+;(>=  5 3 6)
+;( = 5 3 6)
