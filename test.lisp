@@ -11,3 +11,16 @@
 ;(<=  5 3 6)
 ;(>=  5 3 6)
 ;( = 5 3 6)
+
+;(defparameter age 20)
+;(if (> age 18) (write "accepted"))
+
+;(defparameter a 133)
+;(if (> a 20)
+;(write "a is bigger than 20") (write " a is less than 20"))
+
+
+(defparameter x 3)
+(cond ((> x 20) (write "greater than twenty"))
+((< x 5) (write "less than \"five\""))
+(t ( write "between-five-and-twenty") (write "way to go") (defparameter way 10)))

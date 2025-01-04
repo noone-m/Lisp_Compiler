@@ -56,7 +56,7 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBoundedExpression(LispParser.BoundedExpressionContext ctx) {
-        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null) {
+        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null ) {
             String preserveWordName = ctx.getChild(0).getText().toLowerCase(); 
             System.out.println("preserve word name is " + preserveWordName);
             ASTNode node = new ASTNode(preserveWordName);
@@ -71,9 +71,26 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
             }
             return node;
         } 
-        // else if (ctx.expression() != null) {
-        //     return  visit(ctx.expression());
-        // }
+        if (ctx.COND() != null) {
+            ASTNode condNode = new ASTNode("cond");
+            for (ParseTree child : ctx.children) {
+                if (child instanceof LispParser.Cond_branchContext) {
+                    ASTNode branchNode = visit(child);
+                    condNode.addChild(branchNode);
+                }
+            }
+            return condNode;
+        }
         return null;
+    }
+
+    @Override
+    public ASTNode visitCond_branch(LispParser.Cond_branchContext ctx) {
+        ASTNode branchNode = new ASTNode("cond_branch");
+        for (LispParser.ExpressionContext exprCtx : ctx.expression()) {
+            ASTNode exprNode = visit(exprCtx);
+            branchNode.addChild(exprNode);
+        }
+        return branchNode;
     }
 }

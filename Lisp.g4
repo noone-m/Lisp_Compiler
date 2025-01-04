@@ -23,8 +23,8 @@ boundedExpression:
     | LESS_EQUAL expression+    
     | LESS expression+         
     | GREATER expression+      
-    | IF expression expression expression 
-    | COND '(' cond_branch+ ')' 
+    | IF expression ( (expression expression) | expression )
+    | COND  cond_branch+  
     | DEFUN SYMBOL '(' parameters? ')' expression // function definition
     | SETQ SYMBOL expression
     | DEFPARAMETER SYMBOL expression 
@@ -48,7 +48,7 @@ lambdaExpr: LAMBDA '(' parameters? ')' expression
 ;
 
 // Define a conditional branch for `COND`
-cond_branch: '(' expression expression ')' ;
+cond_branch: '(' expression expression+  ')' ;
 
 STRING: '"' ( ~["\\] | '\\' ['"\\nrt] )* '"';
 

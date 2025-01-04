@@ -248,6 +248,61 @@ public class Evaluator {
                     }
                     break;
 
+                case "if":
+                    if (node.children.size() < 2 || node.children.size() > 3) {
+                        throw new Error("Invalid number of arguments for 'if'. Expected 2 or 3.");
+                    }
+                    // Evaluate the condition (first child)
+                    evaluate(node.children.get(0));
+                    Object condition = node.children.get(0).value;
+                    
+                    if (!(condition instanceof Boolean)) {
+                        throw new Error("'if' condition must evaluate to a boolean value.");
+                    }
+
+                    if ((Boolean) condition) {
+                        // Evaluate the "then" branch (second child)
+                        evaluate(node.children.get(1));
+                        node.value = node.children.get(1).value;
+                    } else if (node.children.size() == 3) {
+                        // Evaluate the "else" branch (third child), if provided
+                        evaluate(node.children.get(2));
+                        node.value = node.children.get(2).value;
+                    }
+                    break;
+
+                case "cond":
+                    for (ASTNode branch : node.children) {
+                        // Evaluate the cond_branch
+                        if (branch.label.equals("cond_branch")) {
+                            evaluate(branch);
+                            // if one brach got executed stop don't execute other braches 
+                            if ((boolean)branch.value){
+                                break;
+                            }
+                            // If a branch is evaluated and matches, assign its value to the cond node
+                        } else {
+                            throw new Error("cond: encountered non-cond_branch node.");
+                        }
+                    }
+                    break;
+
+
+                case "cond_branch":
+                    // number 2 here has no meaning just because condition is aready reserved
+                    ASTNode condition2 = node.children.get(0);
+                    evaluate(condition2);
+                    if((boolean)condition2.value){
+                        node.value = true;
+                        for(ASTNode child : node.children){
+                            evaluate(child);
+                        }
+                    }
+                    else{
+                        node.value = false;
+                    }
+                break;
+
                 default:
                     if (variables.containsKey(node.label)) {
                         node.value = variables.get(node.label); // Fetch variable value if defined
