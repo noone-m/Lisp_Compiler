@@ -71,15 +71,25 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
             }
             return node;
         } 
-        if (ctx.COND() != null) {
-            ASTNode condNode = new ASTNode("cond");
-            for (ParseTree child : ctx.children) {
-                if (child instanceof LispParser.Cond_branchContext) {
-                    ASTNode branchNode = visit(child);
-                    condNode.addChild(branchNode);
+
+        if (ctx.DEFUN() != null){
+            ASTNode node = new ASTNode("defun");
+            for (int i = 1; i < ctx.getChildCount(); i++) { 
+                ParseTree child = ctx.getChild(i);
+                // System.out.println("child type is " + child.getClass());
+                if (child instanceof TerminalNodeImpl) { // Handle terminal nodes (like string literals) 
+                    System.out.println(child.getText());
+                    if (child.getText().equals("(")  || child.getText().equals(")") ){
+                      System.out.println("sad");
+                    }
+                    else{
+                        node.addChild(new ASTNode(child.getText()));
+                    }
+                }else{
+                    node.addChild(visit(ctx.getChild(i)));
                 }
             }
-            return condNode;
+            return node;
         }
         return null;
     }
@@ -92,5 +102,15 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
             branchNode.addChild(exprNode);
         }
         return branchNode;
+    }
+
+    @Override
+    public ASTNode visitParameters(LispParser.ParametersContext ctx){
+        ASTNode branchNode = new ASTNode("parameters");
+        for ( TerminalNode symbol : ctx.SYMBOL()) {
+            ASTNode node = new ASTNode(symbol.getText());
+            branchNode.addChild(node);
+        }
+        return branchNode;        
     }
 }

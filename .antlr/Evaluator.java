@@ -1,9 +1,12 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 
 public class Evaluator {
     private Map<String, Object> variables = new HashMap<>();
+    private Map<String, Function> functions = new HashMap<>(); // Store user-defined functions
+
 
     public void evaluate(ASTNode node) {
         if (isNumber(node.label)){
@@ -79,6 +82,10 @@ public class Evaluator {
 
                         }else if (isNumber(label) || isStringLiteral(label) || label.equals("nil") || label.equals("t")) {
                             System.out.println(label);
+                        }
+                        else if (label.equals("List")) {
+                            evaluate(node.children.get(0));
+                            System.out.println(node.children.get(0).value);
                         }
                         else {
                             System.out.println("Undefined variable: " + label);
@@ -301,11 +308,53 @@ public class Evaluator {
                     else{
                         node.value = false;
                     }
-                break;
+                    break;
+
+
+                case "defun":
+                    // Define a new function
+                    String functionName = node.children.get(0).label;
+                    ASTNode parametersNode = node.children.get(1); // Parameters
+                    ASTNode bodyNode = node.children.get(2); // Function body
+                    functions.put(functionName, new Function(parametersNode, bodyNode));
+                    break;
+
 
                 default:
-                    if (variables.containsKey(node.label)) {
-                        node.value = variables.get(node.label); // Fetch variable value if defined
+                    // Handle function calls
+                    if (functions.containsKey(node.label)) {
+                        Function function = functions.get(node.label);
+                        List<ASTNode> arguments = new ArrayList();
+                        ASTNode parent = node.parent;
+                        for (int i=1;i<parent.children.size();i++){
+                            arguments.add(parent.children.get(i));
+                        }                      
+                        if (arguments.size() != function.parameters.children.size()) {
+                            throw new RuntimeException(
+                                "Function " + node.label + " expects " +
+                                function.parameters.children.size() + " arguments but got " + arguments.size()
+                            );
+                        }
+
+                        // Save current variable state
+                        Map<String, Object> previousVariables = new HashMap<>(variables);
+
+                        // Assign arguments to parameters
+                        for (int i = 0; i < arguments.size(); i++) {
+                            ASTNode parameter = function.parameters.children.get(i);
+                            ASTNode argument = arguments.get(i);
+                            evaluate(argument);
+                            variables.put(parameter.label, argument.value);
+                        }
+
+                        // Evaluate function body
+                        evaluate(function.body);
+                        node.value = function.body.value;
+
+                        // Restore previous variable state
+                        variables = previousVariables;
+                    } else if (variables.containsKey(node.label)) {
+                        node.value = variables.get(node.label);
                     }
                     break;
             }
@@ -324,4 +373,16 @@ public class Evaluator {
     private boolean isStringLiteral(String value) {
         return value.startsWith("\"") && value.endsWith("\"");
     }
+
+
+    private class Function {
+        ASTNode parameters;
+        ASTNode body;
+
+        Function(ASTNode parameters, ASTNode body) {
+            this.parameters = parameters;
+            this.body = body;
+        }
+    }
+
 }

@@ -20,7 +20,13 @@
 ;(write "a is bigger than 20") (write " a is less than 20"))
 
 
-(defparameter x 3)
+(defparameter x 34)
 (cond ((> x 20) (write "greater than twenty"))
-((< x 5) (write "less than \"five\""))
+((< x 5) (write "less than five"))
 (t ( write "between-five-and-twenty") (write "way to go") (defparameter way 10)))
+
+
+(defun add-two-numbers (a b)
+  (+ a b))
+(write (add-two-numbers -3 4))
+(write (add-two-numbers -1 4))

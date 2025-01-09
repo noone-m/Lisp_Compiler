@@ -6,6 +6,7 @@ import java.util.List;
 class ASTNode {
     String label;
     Object value;
+    ASTNode parent;
     List<ASTNode> children = new ArrayList<>();
 
     public ASTNode(String label) {
@@ -13,6 +14,7 @@ class ASTNode {
     }
 
     public void addChild(ASTNode child) {
+        child.parent = this;
         children.add(child);
     }
 
