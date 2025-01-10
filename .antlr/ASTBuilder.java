@@ -1,3 +1,4 @@
+import com.sun.security.auth.module.NTLoginModule;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -56,7 +57,7 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBoundedExpression(LispParser.BoundedExpressionContext ctx) {
-        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null ) {
+        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL_OPERATOR() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null || ctx.SETQ() != null || ctx.FORMAT() != null || ctx.EQUAL() != null) {
             String preserveWordName = ctx.getChild(0).getText().toLowerCase(); 
             System.out.println("preserve word name is " + preserveWordName);
             ASTNode node = new ASTNode(preserveWordName);
@@ -74,7 +75,14 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
 
         if (ctx.DEFUN() != null){
             ASTNode node = new ASTNode("defun");
-            for (int i = 1; i < ctx.getChildCount(); i++) { 
+
+            node.addChild(new ASTNode(ctx.getChild(1).getText())); // function name
+
+            ParseTree test = ctx.getChild(3); // 0 is the defun 1 is the function name 2 is "(" and 3 is parameters if any else it would be ")"
+            if (test.getText().equals(")")) { // if no parameter create empety node 
+                node.addChild(new ASTNode("parameters"));
+            }
+            for (int i = 2; i < ctx.getChildCount(); i++) { 
                 ParseTree child = ctx.getChild(i);
                 // System.out.println("child type is " + child.getClass());
                 if (child instanceof TerminalNodeImpl) { // Handle terminal nodes (like string literals) 

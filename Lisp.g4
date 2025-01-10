@@ -7,7 +7,7 @@ expression : NUMBER
     |NIL
     |T                
     | SYMBOL                   
-    | STRING
+    | STRING 
     | PLUS expression+        
     | MINUS expression+        
     | MULTIPLY expression+     
@@ -18,7 +18,7 @@ boundedExpression:
     AND expression+        
     | OR expression+           
     | NOT expression           
-    | EQUAL expression+  
+    | EQUAL_OPERATOR expression+  
     | GREATER_EQUAL expression+    
     | LESS_EQUAL expression+    
     | LESS expression+         
@@ -31,6 +31,7 @@ boundedExpression:
     | WRITE expression
     | WRITE_LINE STRING 
     | FORMAT expression STRING expression*
+    | EQUAL expression expression
     | FUNCALL expression parameters*
     | CAR expression           
     | CDR expression           
@@ -77,6 +78,7 @@ COND: [cC] [oO] [nN] [dD] ;
 AND: [aA] [nN] [dD] ;
 OR: [oO] [rR] ;
 NOT: [nN] [oO] [tT] ;
+EQUAL : [eE] [qQ] [uU] [aA] [lL] ;
 CAR: [cC] [aA] [rR] ;
 CDR: [cC] [dD] [rR] ;
 CONS: [cC] [oO] [nN] [sS] ;
@@ -98,7 +100,7 @@ PLUS: '+' ;
 MINUS: '-' ;
 MULTIPLY: '*' ;
 DIVIDE: '/' ;
-EQUAL: '=' ;
+EQUAL_OPERATOR: '=' ;
 LESS: '<' ;
 GREATER: '>';
 GREATER_EQUAL: '>=' ;

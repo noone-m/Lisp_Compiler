@@ -12,6 +12,9 @@ public class Evaluator {
         if (isNumber(node.label)){
             node.value = Double.parseDouble(node.label);
         }
+        else if (isStringLiteral(node.label)) {
+            node.value = node.label;
+        }
 
         else{
             switch (node.label) {
@@ -55,6 +58,8 @@ public class Evaluator {
                     node.value = result;
                     break;
 
+
+                case "setq":
                 case "defparameter":
                     if (node.children.size() == 2) {
                         String label = node.children.get(0).label;
@@ -320,6 +325,101 @@ public class Evaluator {
                     break;
 
 
+                case "format":
+                    if (node.children.size() < 2) {
+                        throw new Error("FORMAT requires at least two arguments: destination and format-string");
+                    }
+
+                    // Evaluate the destination
+                    evaluate(node.children.get(0));
+                    Object destination = node.children.get(0).value;
+
+                    // Ensure the second argument is a string (format string)
+                    ASTNode formatNode = node.children.get(1);
+                    evaluate(formatNode);
+                    if (!(isStringLiteral(formatNode.label))) {
+                        throw new Error("FORMAT's second argument must be a string");
+                    }
+                    String formatString = formatNode.label;
+
+                    // Evaluate the rest of the arguments
+                    List<Object> args = new ArrayList<>();
+                    for (int i = 2; i < node.children.size(); i++) {
+                        evaluate(node.children.get(i));
+                        args.add(node.children.get(i).value);
+                    }
+                    // Process the format string
+                    StringBuilder stringBuilder = new StringBuilder();
+                    int argIndex = 0;
+
+                    for (int i = 0; i < formatString.length(); i++) {
+                        char ch = formatString.charAt(i);
+
+                        if (ch == '~') {
+                            // Handle format specifiers
+                            if (i + 1 < formatString.length()) {
+                                char nextCh = formatString.charAt(i + 1);
+
+                                switch (nextCh) {
+                                    case '%': // Newline
+                                        stringBuilder.append("\n");
+                                        i++; // Skip the 't'
+                                        break;
+
+                                    case 'a': // Argument substitution
+                                        if (argIndex >= args.size()) {
+                                            throw new Error("Not enough arguments provided for format string");
+                                        }
+                                        Object arg = args.get(argIndex);
+                                        try{
+                                            if(isStringLiteral((String)arg)){
+                                                arg = ((String)arg).substring(1, ((String)arg).length() - 1);
+                                            }
+                                        }catch (Exception e){
+
+                                        }
+                                        stringBuilder.append(arg);
+                                        argIndex++;
+                                        i++; // Skip the 'a'
+                                        break;
+
+                                    default:
+                                        throw new Error("Unsupported format specifier: ~" + nextCh);
+                                }
+                            } else {
+                                throw new Error("Unexpected end of format string after '~'");
+                            }
+                        } else {
+                            stringBuilder.append(ch);
+                        }
+                    }
+
+                    if ((boolean)destination) { // T
+                        // Print to standard output
+                        System.out.print(stringBuilder.deleteCharAt(stringBuilder.length() - 1).deleteCharAt(0));
+                    } else{ // nil
+                        // Return the formatted result
+                        node.value = stringBuilder.toString();
+                    } 
+                    break;
+
+                case "equal":
+                    // Evaluate both child nodes
+                    evaluate(node.children.get(0));
+                    evaluate(node.children.get(1));
+                    Object leftValue = node.children.get(0).value;
+                    Object rightValue = node.children.get(1).value;
+                    // Perform the comparison
+                    if (isStringLiteral((String)leftValue)&& isStringLiteral((String)rightValue)) {
+                        node.value =  leftValue.equals(rightValue);
+                    } else if (leftValue instanceof List && rightValue instanceof List) {
+                        node.value =  leftValue.equals(rightValue); // Structural equality
+                    }
+                    else{
+                        throw new RuntimeException("Unsupported types for 'equal'");
+                    }
+                    break;
+               
                 default:
                     // Handle function calls
                     if (functions.containsKey(node.label)) {
