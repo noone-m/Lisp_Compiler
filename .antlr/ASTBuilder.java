@@ -1,4 +1,5 @@
 import com.sun.security.auth.module.NTLoginModule;
+import com.sun.source.tree.NewArrayTree;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -27,10 +28,12 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
             return new ASTNode(ctx.STRING().getText());       
         } else if (ctx.NIL() != null) {
             return new ASTNode(ctx.NIL().getText().toLowerCase());       
-        } else if (ctx.T() != null) {
+        } else if (ctx.T() != null) {   
             return new ASTNode(ctx.T().getText().toLowerCase());       
         } else if (ctx.list() != null) {
             return visit(ctx.list());
+        } else if (ctx.raw_list() != null) {
+            return  visit(ctx.raw_list());
         } else if (ctx.PLUS() != null || ctx.MINUS() != null || ctx.MULTIPLY() != null || ctx.DIVIDE() != null) {
             String operator = ctx.getChild(0).getText(); // Get the operator symbol
             ASTNode node = new ASTNode(operator);
@@ -56,8 +59,18 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
     }
 
     @Override
+    public ASTNode visitRaw_list(LispParser.Raw_listContext ctx) {
+        ASTNode node = new ASTNode("raw_list");
+        for (int i=1; i < ctx.children.size()-1;i++ ) {
+            ASTNode expressionNode = new ASTNode(ctx.getChild(i).getText());
+            node.addChild(expressionNode);
+        }
+        return node;        
+    }
+
+    @Override
     public ASTNode visitBoundedExpression(LispParser.BoundedExpressionContext ctx) {
-        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL_OPERATOR() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null || ctx.SETQ() != null || ctx.FORMAT() != null || ctx.EQUAL() != null) {
+        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL_OPERATOR() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null || ctx.SETQ() != null || ctx.FORMAT() != null || ctx.EQUAL() != null || ctx.CAR() != null|| ctx.CDR() != null || ctx.CONS() != null) {
             String preserveWordName = ctx.getChild(0).getText().toLowerCase(); 
             System.out.println("preserve word name is " + preserveWordName);
             ASTNode node = new ASTNode(preserveWordName);
@@ -88,7 +101,7 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
                 if (child instanceof TerminalNodeImpl) { // Handle terminal nodes (like string literals) 
                     System.out.println(child.getText());
                     if (child.getText().equals("(")  || child.getText().equals(")") ){
-                      System.out.println("sad");
+                        System.out.println("sad");
                     }
                     else{
                         node.addChild(new ASTNode(child.getText()));

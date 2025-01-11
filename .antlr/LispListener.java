@@ -76,4 +76,14 @@ public interface LispListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCond_branch(LispParser.Cond_branchContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link LispParser#raw_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterRaw_list(LispParser.Raw_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link LispParser#raw_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitRaw_list(LispParser.Raw_listContext ctx);
 }

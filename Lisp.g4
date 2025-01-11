@@ -12,6 +12,7 @@ expression : NUMBER
     | MINUS expression+        
     | MULTIPLY expression+     
     | DIVIDE expression+
+    |raw_list
     | list  ;
 
 boundedExpression: 
@@ -32,11 +33,11 @@ boundedExpression:
     | WRITE_LINE STRING 
     | FORMAT expression STRING expression*
     | EQUAL expression expression
-    | FUNCALL expression parameters*
+    | FUNCALL expression parameters* //todo
     | CAR expression           
     | CDR expression           
-    | CONS expression expression
-    | lambdaExpr                  
+    | CONS expression expression // todo
+    | lambdaExpr       //todo           
     ;
 
 // Define a list as a sequence of expressions in parentheses
@@ -50,6 +51,8 @@ lambdaExpr: LAMBDA '(' parameters? ')' expression
 
 // Define a conditional branch for `COND`
 cond_branch: '(' expression expression+  ')' ;
+
+raw_list: '\'(' expression* ')';
 
 STRING: '"' ( ~["\\] | '\\' ['"\\nrt] )* '"';
 

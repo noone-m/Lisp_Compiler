@@ -95,6 +95,18 @@ public class LispBaseListener implements LispListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCond_branch(LispParser.Cond_branchContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRaw_list(LispParser.Raw_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRaw_list(LispParser.Raw_listContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -81,7 +81,9 @@ public class Evaluator {
                                 else{
                                     System.out.println("NIL");
                                 }
-                            }else{
+                            } else if (value instanceof ASTNode aSTNode) {
+                                System.out.println(RawListAsString(aSTNode));
+                            } else{
                                 System.out.println(value);
                             }
 
@@ -89,8 +91,17 @@ public class Evaluator {
                             System.out.println(label);
                         }
                         else if (label.equals("List")) {
-                            evaluate(node.children.get(0));
-                            System.out.println(node.children.get(0).value);
+                            ASTNode child = node.children.get(0);
+                            evaluate(child);
+                            if(child.value instanceof ASTNode aSTNode) { // raw list
+                                System.out.println(RawListAsString(aSTNode));
+                            }
+                            else{
+                                System.out.println(child.value);
+                            }                            
+                        }
+                        else if (label.equals("raw_list")) {
+                            System.out.println(RawListAsString(node.children.get(0)));
                         }
                         else {
                             System.out.println("Undefined variable: " + label);
@@ -419,7 +430,62 @@ public class Evaluator {
                         throw new RuntimeException("Unsupported types for 'equal'");
                     }
                     break;
-               
+                
+                case "raw_list":
+                    node.value = node;
+                    break;
+
+                case "car":
+                    if (node.children.size() != 1 ) {
+                        throw new RuntimeException("'car' expect to be followed by one expression");
+                    }
+                    ASTNode child = node.children.get(0);
+                    evaluate(child);
+                    if(child.value instanceof  ASTNode aSTNode){
+                        if (isStringLiteral(aSTNode.children.get(0).label)) {
+                            node.value = aSTNode.children.get(0).label; // first value of the list
+                        }
+                        else{
+                            node.value = aSTNode.children.get(0).label.toUpperCase();
+                        }
+                    }
+                    break;
+
+                case "cdr":
+                    if (node.children.size() != 1 ) {
+                        throw new RuntimeException("'cdr' expect to be followed by one expression");
+                    }
+                    child = node.children.get(0);
+                    evaluate(child);
+                    if(child.value instanceof  ASTNode aSTNode){
+                        ASTNode copNode = aSTNode.copy();
+                        copNode.removeChild(0);
+                        node.value = copNode;
+                    }
+                    break; 
+
+
+                case "cons":
+                    if (node.children.size() != 2) {
+                        throw new RuntimeException("'cons' expects to be followed by two expressions");
+                    }
+                    ASTNode firstChild = node.children.get(0); // First argument (element)
+                    ASTNode secondChild = node.children.get(1); // Second argument (list)
+
+                    evaluate(firstChild);
+                    evaluate(secondChild);
+
+                    // Check if the second argument is a list (ASTNode)
+                    if (secondChild.value instanceof ASTNode secondList) {
+                        ASTNode newList = secondList.copy();
+                        newList.children.add(0, firstChild.copy());
+                        node.value = newList;
+                    } else {
+                        throw new RuntimeException("'cons' expects the second argument to be a list");
+                    }
+                    break;
+
+
                 default:
                     // Handle function calls
                     if (functions.containsKey(node.label)) {
@@ -474,6 +540,22 @@ public class Evaluator {
         return value.startsWith("\"") && value.endsWith("\"");
     }
 
+    private String RawListAsString(ASTNode rawList){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(");
+        for (ASTNode child : rawList.children){
+            if (isStringLiteral(child.label)){
+                stringBuilder.append(child.label);
+                stringBuilder.append(" ");
+            }
+            else{
+                stringBuilder.append(child.label.toUpperCase());
+                stringBuilder.append(" ");
+            }
+        }
+        stringBuilder.append("\b)");
+        return stringBuilder.toString();
+    }
 
     private class Function {
         ASTNode parameters;

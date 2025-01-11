@@ -1,1 +1,11 @@
-'( sdf "sdf" 324)
+;(write '(baby "yes" baby 1 2 "mahdi" 3) )
+(defparameter l '( "yes" s 1 2 "mahdi" 3))
+(defparameter x (cdr l))
+(write x))
+;(write (cdr '(baby "yes" baby 1 2 "mahdi" 3)) )
+;(defparameter name1 "mahdi")
+;(defparameter name2 "sdf")
+;(write (equal name1 name2))
+(write (car (cdr l)))
+
+(write (cons 0 '(baby "yes" baby 1 2 "mahdi" 3)))

@@ -51,4 +51,10 @@ public interface LispVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCond_branch(LispParser.Cond_branchContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LispParser#raw_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRaw_list(LispParser.Raw_listContext ctx);
 }
