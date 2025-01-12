@@ -13,7 +13,7 @@ public class Evaluator {
             node.value = Double.parseDouble(node.label);
         }
         else if (isStringLiteral(node.label)) {
-            node.value = node.label;
+            node.value = removeBackSlash(node.label);
         }
 
         else{
@@ -507,48 +507,48 @@ public class Evaluator {
                     }
                     break;
 
-case "funcall":
-    if (node.children.isEmpty()) {
-        throw new RuntimeException("'funcall' expects at least one argument: the function to call.");
-    }
+                case "funcall":
+                    if (node.children.isEmpty()) {
+                        throw new RuntimeException("'funcall' expects at least one argument: the function to call.");
+                    }
 
-    // Evaluate the first child (function or lambda)
-    ASTNode functionNode = node.children.get(0);
-    evaluate(functionNode);
+                    // Evaluate the first child (function or lambda)
+                    ASTNode functionNode = node.children.get(0);
+                    evaluate(functionNode);
 
-    if (!(functionNode.value instanceof Function)) {
-        throw new RuntimeException("'funcall' expects the first argument to evaluate to a function.");
-    }
+                    if (!(functionNode.value instanceof Function)) {
+                        throw new RuntimeException("'funcall' expects the first argument to evaluate to a function.");
+                    }
 
-    Function func = (Function) functionNode.value;
+                    Function func = (Function) functionNode.value;
 
-    // Evaluate arguments for the function
-    List<ASTNode> arguments = node.children.get(1).children;
-    if (arguments.size() != func.parameters.children.size()) {
-        throw new RuntimeException(
-            "Function expects " + func.parameters.children.size() +
-            " arguments but got " + arguments.size()
-        );
-    }
+                    // Evaluate arguments for the function
+                    List<ASTNode> arguments = node.children.get(1).children;
+                    if (arguments.size() != func.parameters.children.size()) {
+                        throw new RuntimeException(
+                            "Function expects " + func.parameters.children.size() +
+                            " arguments but got " + arguments.size()
+                        );
+                    }
 
-    // Save current variable state
-    Map<String, Object> previousVariables = new HashMap<>(variables);
+                    // Save current variable state
+                    Map<String, Object> previousVariables = new HashMap<>(variables);
 
-    // Assign arguments to the lambda's parameters
-    for (int i = 0; i < arguments.size(); i++) {
-        ASTNode parameter = func.parameters.children.get(i);
-        ASTNode argument = arguments.get(i);
-        evaluate(argument);
-        variables.put(parameter.label, argument.value);
-    }
+                    // Assign arguments to the lambda's parameters
+                    for (int i = 0; i < arguments.size(); i++) {
+                        ASTNode parameter = func.parameters.children.get(i);
+                        ASTNode argument = arguments.get(i);
+                        evaluate(argument);
+                        variables.put(parameter.label, argument.value);
+                    }
 
-    // Evaluate the lambda body
-    evaluate(func.body);
-    node.value = func.body.value;
+                    // Evaluate the lambda body
+                    evaluate(func.body);
+                    node.value = func.body.value;
 
-    // Restore previous variable state
-    variables = previousVariables;
-    break;
+                    // Restore previous variable state
+                    variables = previousVariables;
+                    break;
 
 
 
@@ -634,6 +634,17 @@ case "funcall":
         }
         stringBuilder.append("\b)");
         return stringBuilder.toString();
+    }
+
+    private String removeBackSlash(String s){
+        StringBuilder sb = new StringBuilder(s);
+        for(int i=0;i<sb.length();i++){
+            if (sb.charAt(i) == '\\') {
+                sb.deleteCharAt(i);
+                i++;
+            }      
+        }
+        return sb.toString();
     }
 
     private class Function {

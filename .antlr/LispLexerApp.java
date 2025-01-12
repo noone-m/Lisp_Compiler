@@ -30,6 +30,7 @@ public class LispLexerApp {
             Vocabulary vocabulary = lexer.getVocabulary();
 
             for (Token token : tokens.getTokens()) {
+                // System.err.println(vocabulary.getSymbolicName(token.getType()));
                 String tokenInfo = String.format(
                     "[@%d ='%s',<%d:%s>,%d:%d]",
                     token.getTokenIndex(),
