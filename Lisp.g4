@@ -36,8 +36,8 @@ boundedExpression:
     | FUNCALL expression parameters* //todo
     | CAR expression           
     | CDR expression           
-    | CONS expression expression // todo
-    | lambdaExpr       //todo           
+    | CONS expression expression 
+    | LAMBDA '(' parameters? ')' expression       //todo           
     ;
 
 // Define a list as a sequence of expressions in parentheses
@@ -46,8 +46,6 @@ list: '(' (boundedExpression|expression)* ')' ;
 
 parameters: SYMBOL+ ;
 
-lambdaExpr: LAMBDA '(' parameters? ')' expression
-;
 
 // Define a conditional branch for `COND`
 cond_branch: '(' expression expression+  ')' ;

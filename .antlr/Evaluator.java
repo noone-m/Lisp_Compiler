@@ -58,6 +58,25 @@ public class Evaluator {
                     node.value = result;
                     break;
 
+                case "*":
+                    result = 1;
+                    for (ASTNode child : node.children) {
+                        evaluate(child); // Ensure child nodes are evaluated
+                        result *= Double.parseDouble(child.value.toString());
+                    }
+                    node.value = result;
+                    break;
+
+                case "/":
+                    evaluate(node.children.get(0)); // get first number
+                    result = Double.parseDouble(node.children.get(0).value.toString());
+                    for (int i = 1; i < node.children.size(); i++) {
+                        evaluate(node.children.get(i));
+                        result /= Double.parseDouble(node.children.get(i).value.toString());
+                    }
+                    node.value = result;
+                    break;
+
 
                 case "setq":
                 case "defparameter":
@@ -389,6 +408,9 @@ public class Evaluator {
                                         }catch (Exception e){
 
                                         }
+                                        if (arg instanceof ASTNode aSTNode && aSTNode.label.equals("raw_list")){
+                                            arg = RawListAsString(aSTNode);
+                                        }
                                         stringBuilder.append(arg);
                                         argIndex++;
                                         i++; // Skip the 'a'
@@ -485,12 +507,69 @@ public class Evaluator {
                     }
                     break;
 
+case "funcall":
+    if (node.children.isEmpty()) {
+        throw new RuntimeException("'funcall' expects at least one argument: the function to call.");
+    }
+
+    // Evaluate the first child (function or lambda)
+    ASTNode functionNode = node.children.get(0);
+    evaluate(functionNode);
+
+    if (!(functionNode.value instanceof Function)) {
+        throw new RuntimeException("'funcall' expects the first argument to evaluate to a function.");
+    }
+
+    Function func = (Function) functionNode.value;
+
+    // Evaluate arguments for the function
+    List<ASTNode> arguments = node.children.get(1).children;
+    if (arguments.size() != func.parameters.children.size()) {
+        throw new RuntimeException(
+            "Function expects " + func.parameters.children.size() +
+            " arguments but got " + arguments.size()
+        );
+    }
+
+    // Save current variable state
+    Map<String, Object> previousVariables = new HashMap<>(variables);
+
+    // Assign arguments to the lambda's parameters
+    for (int i = 0; i < arguments.size(); i++) {
+        ASTNode parameter = func.parameters.children.get(i);
+        ASTNode argument = arguments.get(i);
+        evaluate(argument);
+        variables.put(parameter.label, argument.value);
+    }
+
+    // Evaluate the lambda body
+    evaluate(func.body);
+    node.value = func.body.value;
+
+    // Restore previous variable state
+    variables = previousVariables;
+    break;
+
+
+
+                case "lambda":
+                    if (node.children.size() != 2) {
+                        throw new RuntimeException("'lambda' expects two arguments: parameters and body.");
+                    }
+                    // Parameters and body
+                    ASTNode lambdaParameters = node.children.get(0); // Optional parameters
+                    ASTNode lambdaBody = node.children.get(1); // Function body
+
+                    // Create a new Function object
+                    node.value = new Function(lambdaParameters, lambdaBody);
+                    break;
+
 
                 default:
                     // Handle function calls
                     if (functions.containsKey(node.label)) {
                         Function function = functions.get(node.label);
-                        List<ASTNode> arguments = new ArrayList();
+                        arguments = new ArrayList();
                         ASTNode parent = node.parent;
                         for (int i=1;i<parent.children.size();i++){
                             arguments.add(parent.children.get(i));
@@ -503,7 +582,7 @@ public class Evaluator {
                         }
 
                         // Save current variable state
-                        Map<String, Object> previousVariables = new HashMap<>(variables);
+                        previousVariables = new HashMap<>(variables);
 
                         // Assign arguments to parameters
                         for (int i = 0; i < arguments.size(); i++) {

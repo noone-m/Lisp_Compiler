@@ -70,7 +70,7 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBoundedExpression(LispParser.BoundedExpressionContext ctx) {
-        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL_OPERATOR() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null || ctx.SETQ() != null || ctx.FORMAT() != null || ctx.EQUAL() != null || ctx.CAR() != null|| ctx.CDR() != null || ctx.CONS() != null) {
+        if (ctx.WRITE() != null || ctx.WRITE_LINE() != null || ctx.DEFPARAMETER() != null || ctx.AND() != null || ctx.OR() != null || ctx.NOT() != null || ctx.EQUAL_OPERATOR() != null|| ctx.GREATER() != null || ctx.GREATER_EQUAL() != null || ctx.LESS() != null || ctx.LESS_EQUAL() != null || ctx.IF() != null || ctx.COND() != null || ctx.SETQ() != null || ctx.FORMAT() != null || ctx.EQUAL() != null || ctx.CAR() != null|| ctx.CDR() != null || ctx.CONS() != null || ctx.FUNCALL() != null) {
             String preserveWordName = ctx.getChild(0).getText().toLowerCase(); 
             System.out.println("preserve word name is " + preserveWordName);
             ASTNode node = new ASTNode(preserveWordName);
@@ -112,6 +112,33 @@ public class ASTBuilder extends LispBaseVisitor<ASTNode> {
             }
             return node;
         }
+
+        if (ctx.LAMBDA() != null){
+            ASTNode node = new ASTNode("lambda");
+
+            ParseTree test = ctx.getChild(2); // 0 is the lambda  1 is "(" and 2 is parameters if any, else it would be ")"
+            if (test.getText().equals(")")) { // if no parameter create empety node 
+                node.addChild(new ASTNode("parameters"));
+            }
+            for (int i = 1; i < ctx.getChildCount(); i++) { 
+                ParseTree child = ctx.getChild(i);
+                // System.out.println("child type is " + child.getClass());
+                if (child instanceof TerminalNodeImpl) { // Handle terminal nodes (like string literals) 
+                    System.out.println(child.getText());
+                    if (child.getText().equals("(")  || child.getText().equals(")") ){
+                        System.out.println("sad");
+                    }
+                    else{
+                        node.addChild(new ASTNode(child.getText()));
+                    }
+                }else{
+                    node.addChild(visit(ctx.getChild(i)));
+                }
+            }
+            return node;
+        }
+
+
         return null;
     }
 
